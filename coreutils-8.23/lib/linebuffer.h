@@ -21,6 +21,11 @@
 
 # include <stdio.h>
 
+/* Get mbstate_t.  */
+# if HAVE_WCHAR_H
+#  include <wchar.h>
+# endif
+
 /* A 'struct linebuffer' holds a line of text. */
 
 struct linebuffer
@@ -28,6 +33,9 @@ struct linebuffer
   size_t size;                  /* Allocated. */
   size_t length;                /* Used. */
   char *buffer;
+# if HAVE_WCHAR_H
+  mbstate_t state;
+# endif
 };
 
 /* Initialize linebuffer LINEBUFFER for use. */

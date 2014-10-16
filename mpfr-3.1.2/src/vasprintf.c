@@ -884,14 +884,18 @@ regular_ab (struct number_parts *np, mpfr_srcptr p,
            first digit, we want the exponent for radix two and the decimal
            point AFTER the first digit. */
         {
-          MPFR_ASSERTN (exp > MPFR_EMIN_MIN /4); /* possible overflow */
+          /* An integer overflow is normally not possible since MPFR_EXP_MIN
+             is twice as large as MPFR_EMIN_MIN. */
+          MPFR_ASSERTN (exp > (MPFR_EXP_MIN + 3) / 4);
           exp = (exp - 1) * 4;
         }
       else
         /* EXP is the exponent for decimal point BEFORE the first digit, we
            want the exponent for decimal point AFTER the first digit. */
         {
-          MPFR_ASSERTN (exp > MPFR_EMIN_MIN); /* possible overflow */
+          /* An integer overflow is normally not possible since MPFR_EXP_MIN
+             is twice as large as MPFR_EMIN_MIN. */
+          MPFR_ASSERTN (exp > MPFR_EXP_MIN);
           --exp;
         }
     }
@@ -1040,7 +1044,7 @@ regular_ab (struct number_parts *np, mpfr_srcptr p,
 }
 
 /* Determine the different parts of the string representation of the regular
-   number P when SPEC.SPEC is 'e', 'E', 'g', or 'G'.
+   number P when spec.spec is 'e', 'E', 'g', or 'G'.
    DEC_INFO contains the previously computed exponent and string or is NULL.
 
    return -1 if some field > INT_MAX */
@@ -1167,7 +1171,7 @@ regular_eg (struct number_parts *np, mpfr_srcptr p,
 }
 
 /* Determine the different parts of the string representation of the regular
-   number P when SPEC.SPEC is 'f', 'F', 'g', or 'G'.
+   number P when spec.spec is 'f', 'F', 'g', or 'G'.
    DEC_INFO contains the previously computed exponent and string or is NULL.
 
    return -1 if some field of number_parts is greater than INT_MAX */
@@ -1559,7 +1563,7 @@ partition_number (struct number_parts *np, mpfr_srcptr p,
             /* fractional part */
             {
               np->point = MPFR_DECIMAL_POINT;
-              np->fp_trailing_zeros = (spec.spec == 'g' && spec.spec == 'G') ?
+              np->fp_trailing_zeros = (spec.spec == 'g' || spec.spec == 'G') ?
                 spec.prec - 1 : spec.prec;
             }
           else if (spec.alt)

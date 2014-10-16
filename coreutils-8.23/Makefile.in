@@ -5057,6 +5057,7 @@ all_root_tests = \
   tests/misc/chcon.sh				\
   tests/misc/chroot-credentials.sh		\
   tests/misc/selinux.sh				\
+  tests/misc/sort-mb-tests.sh			\
   tests/misc/truncate-owned-by-other.sh		\
   tests/mkdir/writable-under-readonly.sh	\
   tests/mkdir/smack-root.sh			\

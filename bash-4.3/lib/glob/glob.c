@@ -123,6 +123,8 @@ static char **glob_dir_to_array __P((char *, char **, int));
 extern char *glob_patscan __P((char *, char *, int));
 extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
 
+extern char *glob_dirscan __P((char *, int));
+
 /* Compile `glob_loop.c' for single-byte characters. */
 #define CHAR	unsigned char
 #define INT	int
@@ -179,42 +181,53 @@ extglob_skipname (pat, dname, flags)
      char *pat, *dname;
      int flags;
 {
-  char *pp, *pe, *t;
-  int n, r;
+  char *pp, *pe, *t, *se;
+  int n, r, negate;
 
+  negate = *pat == '!';
   pp = pat + 2;
-  pe = pp + strlen (pp) - 1;	/*(*/
-  if (*pe != ')')
+  se = pp + strlen (pp) - 1;		/* end of string */
+  pe = glob_patscan (pp, se, 0);	/* end of extglob pattern (( */
+  /* we should check for invalid extglob pattern here */
+  if (pe == 0)
     return 0;
-  if ((t = strchr (pp, '|')) == 0)	/* easy case first */
+
+  /* if pe != se we have more of the pattern at the end of the extglob
+     pattern. Check the easy case first ( */
+  if (pe == se && *pe == ')' && (t = strchr (pp, '|')) == 0)
     {
       *pe = '\0';
+#if defined (HANDLE_MULTIBYTE)
+      r = mbskipname (pp, dname, flags);
+#else
       r = skipname (pp, dname, flags);	/*(*/
+#endif
       *pe = ')';
       return r;
     }
+
+  /* check every subpattern */
   while (t = glob_patscan (pp, pe, '|'))
     {
       n = t[-1];
       t[-1] = '\0';
+#if defined (HANDLE_MULTIBYTE)
+      r = mbskipname (pp, dname, flags);
+#else
       r = skipname (pp, dname, flags);
+#endif
       t[-1] = n;
       if (r == 0)	/* if any pattern says not skip, we don't skip */
         return r;
       pp = t;
     }	/*(*/
 
-  if (pp == pe)		/* glob_patscan might find end of pattern */
+  /* glob_patscan might find end of pattern */
+  if (pp == se)
     return r;
 
-  *pe = '\0';
-#  if defined (HANDLE_MULTIBYTE)
-  r = mbskipname (pp, dname, flags);	/*(*/
-#  else
-  r = skipname (pp, dname, flags);	/*(*/
-#  endif
-  *pe = ')';
-  return r;
+  /* but if it doesn't then we didn't match a leading dot */
+  return 0;
 }
 #endif
 
@@ -277,20 +290,23 @@ wextglob_skipname (pat, dname, flags)
      int flags;
 {
 #if EXTENDED_GLOB
-  wchar_t *pp, *pe, *t, n;
-  int r;
+  wchar_t *pp, *pe, *t, n, *se;
+  int r, negate;
 
+  negate = *pat == L'!';
   pp = pat + 2;
-  pe = pp + wcslen (pp) - 1;	/*(*/
-  if (*pe != L')')
-    return 0;
-  if ((t = wcschr (pp, L'|')) == 0)
+  se = pp + wcslen (pp) - 1;	/*(*/
+  pe = glob_patscan_wc (pp, se, 0);
+
+  if (pe == se && *pe == ')' && (t = wcschr (pp, L'|')) == 0)
     {
       *pe = L'\0';
       r = wchkname (pp, dname); /*(*/
       *pe = L')';
       return r;
     }
+
+  /* check every subpattern */
   while (t = glob_patscan_wc (pp, pe, '|'))
     {
       n = t[-1];
@@ -305,10 +321,8 @@ wextglob_skipname (pat, dname, flags)
   if (pp == pe)		/* glob_patscan_wc might find end of pattern */
     return r;
 
-  *pe = L'\0';
-  r = wchkname (pp, dname);	/*(*/
-  *pe = L')';
-  return r;
+  /* but if it doesn't then we didn't match a leading dot */
+  return 0;
 #else
   return (wchkname (pat, dname));
 #endif
@@ -1006,7 +1020,7 @@ glob_filename (pathname, flags)
 {
   char **result;
   unsigned int result_size;
-  char *directory_name, *filename, *dname;
+  char *directory_name, *filename, *dname, *fn;
   unsigned int directory_len;
   int free_dirname;			/* flag */
   int dflags;
@@ -1022,6 +1036,18 @@ glob_filename (pathname, flags)
 
   /* Find the filename.  */
   filename = strrchr (pathname, '/');
+#if defined (EXTENDED_GLOB)
+  if (filename && extended_glob)
+    {
+      fn = glob_dirscan (pathname, '/');
+#if DEBUG_MATCHING
+      if (fn != filename)
+	fprintf (stderr, "glob_filename: glob_dirscan: fn (%s) != filename (%s)\n", fn ? fn : "(null)", filename);
+#endif
+      filename = fn;
+    }
+#endif
+
   if (filename == NULL)
     {
       filename = pathname;

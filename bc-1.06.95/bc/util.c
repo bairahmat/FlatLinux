@@ -602,8 +602,7 @@ lookup (name, namekind)
     case FUNCTDEF:
       if (id->f_name != 0)
 	{
-	  if (namekind != FUNCT)
-	    free(name);
+	  free(name);
 	  /* Check to see if we are redefining a math lib function. */ 
 	  if (use_math && namekind == FUNCTDEF && id->f_name <= 6)
 	    id->f_name = next_func++;

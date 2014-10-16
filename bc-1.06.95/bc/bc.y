@@ -569,6 +569,7 @@ expression		:  named_expression ASSIGN_OP
 				    generate (">");
 				  break;
 				}
+			        free($2);	
 			    }
 			| expression '+' expression
 			    {

@@ -99,6 +99,7 @@ more_functions (VOID)
     {
       f = &functions[indx];
       f->f_defined = FALSE;
+      f->f_void = FALSE;
       f->f_body = (char *) bc_malloc (BC_START_SIZE);
       f->f_body_size = BC_START_SIZE;
       f->f_code_size = 0;

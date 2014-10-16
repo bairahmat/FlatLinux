@@ -2424,7 +2424,7 @@ shell_getc (remove_quoted_newline)
 	 not already end in an EOF character.  */
       if (shell_input_line_terminator != EOF)
 	{
-	  if (shell_input_line_size < SIZE_MAX && shell_input_line_len > shell_input_line_size - 3)
+	  if (shell_input_line_size < SIZE_MAX-3 && (shell_input_line_len+3 > shell_input_line_size))
 	    shell_input_line = (char *)xrealloc (shell_input_line,
 					1 + (shell_input_line_size += 2));
 
@@ -2642,7 +2642,7 @@ gather_here_documents ()
   int r;
 
   r = 0;
-  while (need_here_doc)
+  while (need_here_doc > 0)
     {
       parser_state |= PST_HEREDOC;
       make_here_document (redir_stack[r++], line_number);
@@ -3398,7 +3398,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
          within a double-quoted ${...} construct "an even number of
          unescaped double-quotes or single-quotes, if any, shall occur." */
       /* This was changed in Austin Group Interp 221 */
-      if MBTEST(posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
+      if MBTEST(posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE && dolbrace_state != DOLBRACE_QUOTE2 && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
 	continue;
 
       /* Could also check open == '`' if we want to parse grouping constructs
@@ -6075,6 +6075,7 @@ save_parser_state (ps)
 
   ps->expand_aliases = expand_aliases;
   ps->echo_input_at_read = echo_input_at_read;
+  ps->need_here_doc = need_here_doc;
 
   ps->token = token;
   ps->token_buffer_size = token_buffer_size;
@@ -6123,6 +6124,7 @@ restore_parser_state (ps)
 
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
+  need_here_doc = ps->need_here_doc;
 
   FREE (token);
   token = ps->token;
