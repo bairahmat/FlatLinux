@@ -56,7 +56,7 @@ http://sourceforge.net/projects/procps-ng/files/Production/procps-ng-3.3.9.tar.x
 http://downloads.sourceforge.net/project/psmisc/psmisc/psmisc-22.21.tar.gz
 http://ftp.gnu.org/gnu/readline/readline-6.3.tar.gz
 http://ftp.gnu.org/gnu/sed/sed-4.2.2.tar.bz2
-http://pkg-shadow.alioth.debian.org/releases/shadow-4.2.1.tar.xz
+http://ftp.cc.uoc.gr/mirrors/linux/lfs/LFS/conglomeration/shadow/shadow-4.2.1.tar.xz
 http://www.infodrom.org/projects/sysklogd/download/sysklogd-1.5.tar.gz
 http://download.savannah.gnu.org/releases/sysvinit/sysvinit-2.88dsf.tar.bz2
 http://ftp.gnu.org/gnu/tar/tar-1.28.tar.xz
@@ -81,3 +81,5 @@ http://www.linuxfromscratch.org/patches/lfs/7.6/kbd-2.0.2-backspace-1.patch
 http://www.linuxfromscratch.org/patches/lfs/7.6/mpfr-3.1.2-upstream_fixes-2.patch
 http://www.linuxfromscratch.org/patches/lfs/7.6/readline-6.3-upstream_fixes-2.patch
 http://www.linuxfromscratch.org/patches/lfs/7.6/sysvinit-2.88dsf-consolidated-1.patch
+ftp://ftp.openssl.org/source/old/1.0.1/openssl-1.0.1i.tar.gz
+http://www.linuxfromscratch.org/patches/blfs/7.6/openssl-1.0.1i-fix_parallel_build-1.patch

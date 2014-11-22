@@ -13,7 +13,7 @@ read LFS
 if [ "$LFS" = "" ]
 then
 	echo "Where would you like to mount $DEVICE?"
-	read LOC
+	read LFS
 	echo "Attempting to mount ${DEVICE}..."
 	mount $DEVICE $LFS
 	if [ "$?" -ne "0" ]
@@ -60,6 +60,11 @@ mkdir -v $LFS/sources
 cd $LFS/sources
 chmod -v a+wt $LFS/sources
 wget -i $dataDir/wget-list.txt -P $LFS/sources
+if [ "$?" -ne "0" ]
+then
+	echo "Getting programs to compile failed."
+	exit
+fi
 mkdir -v $LFS/tools
 ln -sv $LFS/tools /
 OLDPATH=$PATH
@@ -331,6 +336,8 @@ then
 	echo "DejaGNU failed."
 	exit
 fi
+cd ..
+rm -r dejagnu-1.5.1
 #DejaGNU done
 tar -xf check-0.9.14.tar.gz
 cd check-0.9.14
@@ -634,11 +641,15 @@ mount -vt tmpfs tmpfs $LFS/run
 if [ -h $LFS/dev/shm ]; then
   mkdir -pv $LFS/$(readlink $LFS/dev/shm)
 fi
-cp ${dataDir}/install2.sh ..
-echo "At the prompt, type ./install2.sh"
+cp ${dataDir}/install2.sh $LFS
+echo "At the prompt, type '/install2.sh'. If you would like to skip all make checks, type 'yes n | /install2.sh'"
 chroot "$LFS" /tools/bin/env -i \
     HOME=/root                  \
     TERM="$TERM"                \
     PS1='\u:\w\$ '              \
     PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin \
-    /tools/bin/bash --login +h
+    /tools/bin/bash --login +h /install2.sh "$DEVICE" $1
+export PATH="$PATH:/sbin:/usr/sbin"
+update-grub2
+echo "Installation is complete. Root password is PASSWORD"
+echo $SECONDS
