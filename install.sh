@@ -152,8 +152,8 @@ fi
 cd ..
 rm -r gcc-4.9.1 gcc-build
 # gcc pass 1 done
-tar -xf linux-3.16.2.tar.xz
-cd linux-3.16.2
+tar -xf linux-3.17.4.tar.xz
+cd linux-3.17.4
 make mrproper
 make INSTALL_HDR_PATH=dest headers_install
 if [ "$?" -ne "0" ]
@@ -163,7 +163,7 @@ then
 fi
 cp -rv dest/include/* /tools/include
 cd ..
-rm -r linux-3.16.2
+rm -r linux-3.17.4
 #api headers done
 tar -xf glibc-2.20.tar.xz
 cd glibc-2.20
@@ -642,7 +642,6 @@ if [ -h $LFS/dev/shm ]; then
   mkdir -pv $LFS/$(readlink $LFS/dev/shm)
 fi
 cp ${dataDir}/install2.sh $LFS
-echo "At the prompt, type '/install2.sh'. If you would like to skip all make checks, type 'yes n | /install2.sh'"
 chroot "$LFS" /tools/bin/env -i \
     HOME=/root                  \
     TERM="$TERM"                \
@@ -652,4 +651,3 @@ chroot "$LFS" /tools/bin/env -i \
 export PATH="$PATH:/sbin:/usr/sbin"
 update-grub2
 echo "Installation is complete. Root password is PASSWORD"
-echo $SECONDS

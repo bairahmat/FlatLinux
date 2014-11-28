@@ -62,14 +62,14 @@ chgrp -v utmp /var/log/lastlog
 chmod -v 664  /var/log/lastlog
 chmod -v 600  /var/log/btmp
 cd /sources
-tar -xf linux-3.16.2.tar.xz
-cd linux-3.16.2
+tar -xf linux-3.17.4.tar.xz
+cd linux-3.17.4
 make mrproper
 make INSTALL_HDR_PATH=dest headers_install
 find dest/include \( -name .install -o -name ..install.cmd \) -delete
 cp -rv dest/include/* /usr/include
 cd ..
-rm -r linux-3.16.2
+rm -r linux-3.17.4
 #api headers done
 tar -xf man-pages-3.72.tar.xz
 cd man-pages-3.72
@@ -1400,10 +1400,10 @@ cp -vfr doc/*     /usr/share/doc/openssl-1.0.1i
 cd ..
 rm -r openssl-1.0.1i
 #kernel and done!
-tar -xf linux-3.16.2.tar.xz
-cd linux-3.16.2
+tar -xf linux-3.17.4.tar.xz
+cd linux-3.17.4
 make mrproper
-make alldefconfig
+make defconfig
 make
 if [ "$?" -ne "0" ]
 then
@@ -1412,11 +1412,11 @@ then
 fi
 make modules_install
 arch=$(uname -m)
-cp -v arch/${arch}/boot/bzImage /boot/vmlinuz-3.16.2-lfs-7.6
-cp -v System.map /boot/System.map-3.16.2
-cp -v .config /boot/config-3.16.2
-install -d /usr/share/doc/linux-3.16.2
-cp -r Documentation/* /usr/share/doc/linux-3.16.2
+cp -v arch/${arch}/boot/bzImage /boot/vmlinuz-3.17.4-lfs-7.6
+cp -v System.map /boot/System.map-3.17.4
+cp -v .config /boot/config-3.17.4
+install -d /usr/share/doc/linux-3.17.4
+cp -r Documentation/* /usr/share/doc/linux-3.17.4
 install -v -m755 -d /etc/modprobe.d
 cat > /etc/modprobe.d/usb.conf << "EOF"
 # Begin /etc/modprobe.d/usb.conf
