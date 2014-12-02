@@ -159,9 +159,9 @@ done
 cp -v zone.tab zone1970.tab iso3166.tab $ZONEINFO
 zic -d $ZONEINFO -p America/New_York
 unset ZONEINFO
-if [ -f /usr/share/zoneinfo/${2} ]
+if [ -f /usr/share/zoneinfo/${3} ]
 then
-	cp -v /usr/share/zoneinfo/${2} /etc/localtime
+	cp -v /usr/share/zoneinfo/${3} /etc/localtime
 else
 	tzselect
 	echo "Enter the last line printed."
@@ -1403,7 +1403,12 @@ rm -r openssl-1.0.1i
 tar -xf linux-3.17.4.tar.xz
 cd linux-3.17.4
 make mrproper
-make defconfig
+if [ "$2" -ne "y" ]
+then
+	make defconfig
+else
+	make menuconfig
+fi
 make
 if [ "$?" -ne "0" ]
 then

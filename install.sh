@@ -33,6 +33,13 @@ then
 	echo "$LFS is not a mountpoint."
 	exit
 fi
+echo -en "Would you like to manually configure the kernel?(y/n) "
+read man_config
+if [ "$man_config" -ne "n" ]
+then
+	echo "You will configure the kernel later."
+	man_config="y"
+fi
 # If the script gets here, $LFS is where we should install it on.
 echo -e "All data on $LFS will be erased and unrecoverable. You should move all important files to another location.\nAre you ready to have all files erased?(y/n)"
 read confirmDelete
@@ -647,7 +654,7 @@ chroot "$LFS" /tools/bin/env -i \
     TERM="$TERM"                \
     PS1='\u:\w\$ '              \
     PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin \
-    /tools/bin/bash --login +h /install2.sh "$DEVICE" $1
+    /tools/bin/bash --login +h /install2.sh "$DEVICE" $man_config $1
 export PATH="$PATH:/sbin:/usr/sbin"
 update-grub2
 echo "Installation is complete. Root password is PASSWORD"
