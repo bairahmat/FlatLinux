@@ -35,6 +35,9 @@ main (int argc, char *argv[])
 		return 1;
 	}
 	fclose(temp);
+	exit_code=unlink("temp");
+	if(exit_code==-1)
+		printf("WARN: Couldn't delete temperary file.");
 	trim(timezone, 1);
 	printf("Is %s the correct timezone?\n(Y/n): ", timezone);
 	getline_max=(size_t)1;
@@ -66,7 +69,7 @@ main (int argc, char *argv[])
 		fprintf(stderr, "Error.\n");
 		return 1;
 	}
-	if(strncmp("\n", location, 1)!=0){
+	if(strncmp("\n", location, 1)==0){
 		printf("Where would you like %s mounted?\n", partition);
 		getline_max=20;
 		exit_code=getline(&location, &getline_max, stdin);
@@ -87,14 +90,6 @@ main (int argc, char *argv[])
 		}
 		free(command);
 	}else{
-		printf("Where is %s mounted?\n", partition);
-		getline_max=20;
-		exit_code=getline(&location, &getline_max, stdin);
-		trim(location, 1);
-		if(exit_code==-1){
-			fprintf(stderr, "Error.");
-			return 1;
-		}
 		command=(char *)malloc(40);
 		strcpy(command, "mountpoint -q ");
 		strcat(command, location);
