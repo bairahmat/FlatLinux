@@ -16,6 +16,8 @@ main (int argc, char *argv[])
 	char *answer;
 	size_t getline_max=(size_t)25;
 	char *command;
+	char *man_config;
+	FILE *variables;
 	
 	exit_code=system("tzselect > temp");
 	if(exit_code!=0){
@@ -36,15 +38,15 @@ main (int argc, char *argv[])
 	}
 	fclose(temp);
 	exit_code=unlink("temp");
+	/*won't exit because deleting the temp file isn't important.*/
 	if(exit_code==-1)
-		printf("WARN: Couldn't delete temperary file.");
+		printf("WARN: Couldn't delete temporary file.");
 	trim(timezone, 1);
 	printf("Is %s the correct timezone?\n(Y/n): ", timezone);
-	getline_max=(size_t)1;
+	getline_max=(size_t)2;
 	answer=(char *)malloc(2);
 	exit_code=getline(&answer, &getline_max, stdin);
-	trim(answer, 1);
-	if(!((strncmp(answer, "\n", (size_t)1)==0) || (strncmp(answer, "Y", (size_t)1)==0) || (strncmp(answer, "y", (size_t)1)==0))){
+	if(strncmp(answer, "n", (size_t)1)==0 || strncmp(answer, "N", (size_t)1)==0){
 		return 1;
 	}
 	printf("What partition would you like FlatLinux installed on?\n");
@@ -64,7 +66,6 @@ main (int argc, char *argv[])
 	location=(char *)malloc(20);
 	getline_max=20;
 	exit_code=getline(&location, &getline_max, stdin);
-	trim(location, 1);
 	if(exit_code==-1){
 		fprintf(stderr, "Error.\n");
 		return 1;
@@ -90,6 +91,7 @@ main (int argc, char *argv[])
 		}
 		free(command);
 	}else{
+		trim(location, 1);
 		command=(char *)malloc(40);
 		strcpy(command, "mountpoint -q ");
 		strcat(command, location);
@@ -101,6 +103,38 @@ main (int argc, char *argv[])
 		free(command);
 	}
 	/*have location, partition, and timezone.*/
+	printf("Would you like to manually configure the kernel?(Y/n): ");
+	getline_max=2;
+	exit_code=getline(&answer, &getline_max, stdin);
+	trim(answer, 1);
+	if(exit_code==-1){
+		fprintf(stderr, "Error.");
+		return 1;
+	}
+	if(strncmp(answer, "n", (size_t)1)==0 || strncmp(answer, "N", (size_t)1)==0)
+		man_config="n";
+	else
+		man_config="y";
+	printf("All data on %s will be erased. Is this okay? (Y/n): ", partition);
+	getline_max=2;
+	getline(&answer, &getline_max, stdin);
+	trim(answer, 1);
+	if(strncmp(answer, "n", (size_t)1)==0 || strncmp(answer, "N", (size_t)1)==0)
+		return 1;
+	variables=fopen("var.sh", "w");
+	if(variables==NULL){
+		fprintf(stderr, "Writing variables failed.");
+		return 1;
+	}
+	exit_code=fprintf(variables, "DEVICE=%s\nLFS=%s\nman_config=%s\ntz=%s\n", partition, location, man_config, timezone);
+	if(exit_code==-1){
+		fprintf(stderr, "Writing variables failed.");
+		return 1;
+	}
+	fclose(variables);
+	/*time to install*/
+	system("bash install.sh");
+	unlink("var.sh");
 	return 0;
 }
 
